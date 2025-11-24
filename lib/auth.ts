@@ -2,7 +2,7 @@ import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'super@digishop.local'
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin2025'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'Admin2025'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -51,9 +51,15 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
+    async redirect({ url, baseUrl }) {
+      // Ne rediriger que vers le même domaine (évite les boucles ou URL externes)
+      if (url.startsWith(baseUrl)) return url
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      return baseUrl
+    },
   },
-  // Autoriser les hôtes non standard (localhost avec ports variables) pour éviter des rejets
-  // trustHost: true,
+  // Autoriser les hôtes dynamiques/prévisualisations (Vercel) si NEXTAUTH_URL n'est pas défini
+  trustHost: true,
   // Logger conforme aux signatures NextAuth (code, ...args)
   logger: {
     error: (code, ...args) => console.error('[next-auth:error]', code, ...args),
@@ -64,7 +70,7 @@ export const authOptions: NextAuthOptions = {
       }
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET ?? (process.env.NODE_ENV !== 'production' ? 'dev-secret' : undefined),
 }
 
 

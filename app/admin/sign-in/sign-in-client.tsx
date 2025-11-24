@@ -3,26 +3,28 @@
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { FiLogIn, FiShield, FiAlertCircle } from 'react-icons/fi'
+import { useRouter } from 'next/navigation'
 
 export default function SignInContent() {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
     try {
-      // Laisser NextAuth gérer la redirection automatiquement
       const res = await signIn('credentials', {
         email,
         password,
+        redirect: false,
         callbackUrl: '/admin',
       })
-      if (!res) {
-        // res peut être undefined si la redirection est gérée automatiquement
+      if (res?.ok) {
+        router.replace('/admin')
         return
       }
       if (res?.error) {
@@ -87,7 +89,7 @@ export default function SignInContent() {
             {loading ? 'Connexion en cours...' : 'Se connecter'}
           </button>
           <p className="mt-2 text-xs text-gray-500">
-            Astuce: identifiants par défaut — email <code className="rounded bg-gray-100 px-1">super@digishop.local</code> et mot de passe <code className="rounded bg-gray-100 px-1">admin2025</code>.
+            Astuce: identifiants par défaut — email <code className="rounded bg-gray-100 px-1">super@digishop.local</code> et mot de passe <code className="rounded bg-gray-100 px-1">Admin2025</code>.
           </p>
         </form>
       </div>
